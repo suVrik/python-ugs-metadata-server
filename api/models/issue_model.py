@@ -10,9 +10,9 @@ class IssueBuildBase(BaseModel):
     Change: int = Field(..., ge=0)
     JobName: str = Field(..., min_length=1, max_length=1024)
     JobUrl: str = Field(..., min_length=1, max_length=1024)
-    JobStepName: str = Field(..., min_length=1, max_length=1024)
-    JobStepUrl: str = Field(..., min_length=1, max_length=1024)
-    ErrorUrl: str = Field(..., min_length=1, max_length=1024)
+    JobStepName: str | None = Field(None, min_length=1, max_length=1024)
+    JobStepUrl: str | None = Field(None, min_length=1, max_length=1024)
+    ErrorUrl: str | None = Field(None, min_length=1, max_length=1024)
     Outcome: int
 
 class IssueBuildRequest(IssueBuildBase):
@@ -39,22 +39,22 @@ class IssueDiagnosticResponse(IssueDiagnosticBase):
     pass
 
 class IssueBase(BaseModel):
-    CreatedAt: datetime
-    RetrievedAt: datetime
     Project: str = Field(..., min_length=1, max_length=64)
     Summary: str = Field(..., min_length=1, max_length=256)
-    Owner: str = Field(..., min_length=1, max_length=128)
-    NominatedBy: str = Field(..., min_length=1, max_length=128)
-    AcknowledgedAt: datetime | None = None
-    FixChange: int = Field(..., ge=0)
-    ResolvedAt: datetime | None = None
-    bNotify: bool
+    Owner: str | None = Field(None, min_length=1, max_length=128)
 
 class IssueRequest(IssueBase):
     pass
 
 class IssueResponse(IssueBase):
     Id: int
+    CreatedAt: datetime
+    RetrievedAt: datetime
+    NominatedBy: str | None = Field(None, min_length=1, max_length=128)
+    AcknowledgedAt: datetime | None = None
+    FixChange: int | None = Field(None, ge=0)
+    ResolvedAt: datetime | None = None
+    bNotify: bool
 
 class IssueCreateResponse(BaseModel):
     Id: int

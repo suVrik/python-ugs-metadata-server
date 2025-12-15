@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query, Path
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
-from models.issue_model import IssueRequest, IssueResponse, IssueUpdateRequest,
+from models.issue_model import (IssueRequest, IssueResponse, IssueUpdateRequest,
     IssueBuildRequest, IssueBuildResponse, IssueBuildCreateResponse, IssueBuildUpdateRequest,
-    IssueDiagnosticRequest, IssueDiagnosticResponse, IssueWatcherRequest, IssueCreateResponse
+    IssueDiagnosticRequest, IssueDiagnosticResponse, IssueWatcherRequest, IssueCreateResponse)
 
 router = APIRouter()
 
@@ -82,19 +82,21 @@ async def get_issues(
     user: str | None = Query(None, min_length=1, max_length=128)
 ):
     if user is not None:
+        assert include_resolved == False and maxresults is None
+
         return await get_issues_internal(user_name=user)
     else:
         return await get_issues_internal(include_resolved=includeresolved, max_results=maxresults)
 
 @router.get("/{issue_id}", response_model=IssueResponse)
-async def get_issue(issue_id: int = Query(ge=0)):
+async def get_issue(issue_id: int = Path(..., ge=0)):
     issues = await get_issues_internal(issue_id=issue_id, include_resolved=True)
     if len(issues) == 0:
         return
     return issues[0]
 
 @router.put("/{issue_id}")
-async def put_issue(issue_id: int = Query(ge=0), request: IssueUpdateRequest):
+async def put_issue(issue_id: int = Path(..., ge=0), request: IssueUpdateRequest):
     updates = []
     params = []
     
@@ -147,7 +149,7 @@ async def post_issues(request: IssueRequest):
     return IssueCreateResponse(Id=issue_id)
 
 @router.delete("/{issue_id}")
-async def delete_issue(issue_id: int = Query(ge=0)):
+async def delete_issue(issue_id: int = Path(..., ge=0)):
     await DatabaseUtils.execute_sqls((
         "DELETE FROM ugs_db.IssueWatchers WHERE IssueId = %s",
         "DELETE FROM ugs_db.IssueBuilds WHERE IssueId = %s",
@@ -155,7 +157,7 @@ async def delete_issue(issue_id: int = Query(ge=0)):
     ), ((issue_id,), (issue_id,), (issue_id,)))
 
 @router.get("/{issue_id}/builds", response_model=list[IssueBuildResponse])
-async def get_issue_builds_sub(issue_id: int = Query(ge=0)):
+async def get_issue_builds_sub(issue_id: int = Path(..., ge=0)):
     sql = """
         SELECT IssueBuilds.Id, IssueBuilds.Stream, IssueBuilds.Change, IssueBuilds.JobName,
                IssueBuilds.JobUrl, IssueBuilds.JobStepName, IssueBuilds.JobStepUrl,
@@ -182,7 +184,7 @@ async def get_issue_builds_sub(issue_id: int = Query(ge=0)):
     return results
 
 @router.post("/{issue_id}/builds", response_model=IssueBuildCreateResponse)
-async def post_issue_builds_sub(issue_id: int = Query(ge=0), request: IssueBuildRequest):
+async def post_issue_builds_sub(issue_id: int = Path(..., ge=0), request: IssueBuildRequest):
     sql = """
         INSERT INTO ugs_db.IssueBuilds
             (IssueId, Stream, Change, JobName, JobUrl, JobStepName, JobStepUrl, ErrorUrl, Outcome)
@@ -204,7 +206,7 @@ async def post_issue_builds_sub(issue_id: int = Query(ge=0), request: IssueBuild
     return IssueBuildCreateResponse(Id=build_id)
 
 @router.get("/{issue_id}/diagnostics", response_model=list[IssueDiagnosticResponse])
-async def get_issue_diagnostics_sub(issue_id: int = Query(ge=0)):
+async def get_issue_diagnostics_sub(issue_id: int = Path(..., ge=0)):
     sql = """
         SELECT BuildId, Message, Url
         FROM ugs_db.IssueDiagnostics
@@ -223,7 +225,7 @@ async def get_issue_diagnostics_sub(issue_id: int = Query(ge=0)):
     return results
 
 @router.post("/{issue_id}/diagnostics")
-async def post_issue_diagnostics_sub(issue_id: int = Query(ge=0), request: IssueDiagnosticRequest):
+async def post_issue_diagnostics_sub(issue_id: int = Path(..., ge=0), request: IssueDiagnosticRequest):
     sql = """
         INSERT INTO ugs_db.IssueDiagnostics (IssueId, BuildId, Message, Url)
         VALUES (%s, %s, %s, %s)
@@ -237,7 +239,7 @@ async def post_issue_diagnostics_sub(issue_id: int = Query(ge=0), request: Issue
     ))
 
 @router.get("/{issue_id}/watchers", response_model=list[str])
-async def get_issue_watchers(issue_id: int = Query(ge=0)):
+async def get_issue_watchers(issue_id: int = Path(..., ge=0)):
     sql = """
         SELECT Users.Name
         FROM ugs_db.IssueWatchers
@@ -253,7 +255,7 @@ async def get_issue_watchers(issue_id: int = Query(ge=0)):
     return results
 
 @router.post("/{issue_id}/watchers")
-async def post_issue_watchers(issue_id: int = Query(ge=0), request: IssueWatcherRequest):
+async def post_issue_watchers(issue_id: int = Path(..., ge=0), request: IssueWatcherRequest):
     user_id = await CommonUtils.find_or_add_user(request.UserName)
     
     sql = "INSERT IGNORE INTO ugs_db.IssueWatchers (IssueId, UserId) VALUES (%s, %s)"
@@ -261,7 +263,7 @@ async def post_issue_watchers(issue_id: int = Query(ge=0), request: IssueWatcher
     await DatabaseUtils.execute_sql(sql, (issue_id, user_id))
 
 @router.delete("/{issue_id}/watchers")
-async def delete_issue_watchers(issue_id: int = Query(ge=0), request: IssueWatcherRequest):
+async def delete_issue_watchers(issue_id: int = Path(..., ge=0), request: IssueWatcherRequest):
     user_id = await CommonUtils.find_or_add_user(request.UserName)
 
     sql = "DELETE FROM ugs_db.IssueWatchers WHERE IssueId = %s AND UserId = %s"
@@ -271,7 +273,7 @@ async def delete_issue_watchers(issue_id: int = Query(ge=0), request: IssueWatch
 router_issuebuilds = APIRouter()
 
 @router_issuebuilds.get("/{build_id}", response_model=IssueBuildResponse | None)
-async def get_issue_builds(build_id: int = Query(ge=0)):
+async def get_issue_builds(build_id: int = Path(..., ge=0)):
     sql = """
         SELECT IssueBuilds.Id, IssueBuilds.Stream, IssueBuilds.Change, IssueBuilds.JobName,
                IssueBuilds.JobUrl, IssueBuilds.JobStepName, IssueBuilds.JobStepUrl,
@@ -297,7 +299,7 @@ async def get_issue_builds(build_id: int = Query(ge=0)):
     )
 
 @router_issuebuilds.put("/{build_id}")
-async def put_issue_builds(build_id: int = Query(ge=0), request: IssueBuildUpdateRequest):
+async def put_issue_builds(build_id: int = Path(..., ge=0)), request: IssueBuildUpdateRequest):
     sql = """
         UPDATE ugs_db.IssueBuilds
         SET Outcome = %s

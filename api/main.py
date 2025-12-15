@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from routers import build_router, comment_router, event_router, latest_router,
-    issues_router, telemetry_router, error_router, user_router
+from routers import (build_router, comment_router, event_router, latest_router,
+    issues_router, telemetry_router, error_router, user_router)
 from database_utils import DatabaseUtils
 
 @asynccontextmanager
