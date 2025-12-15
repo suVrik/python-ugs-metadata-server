@@ -13,9 +13,9 @@ class CommonUtils:
         return project_name
 
     @staticmethod
-    async def find_or_add_project(project_name: str) -> int:
+    async def find_or_add_project(project_name: str | None) -> int:
         if not isinstance(project_name, str) or len(project_name) == 0:
-            raise ValueError("project name must be a non-empty string")
+            return None
 
         sql = """
             INSERT INTO ugs_db.Projects (Name)
@@ -26,9 +26,9 @@ class CommonUtils:
         return await DatabaseUtils.execute_sql(sql, (project_name,))
 
     @staticmethod
-    async def find_or_add_user(user_name: str) -> int:
+    async def find_or_add_user(user_name: str | None) -> int:
         if not isinstance(user_name, str) or len(user_name) == 0:
-            raise ValueError("user name must be a non-empty string")
+            return None
 
         sql = """
             INSERT INTO ugs_db.Users (Name)

@@ -82,8 +82,6 @@ async def get_issues(
     user: str | None = Query(None, min_length=1, max_length=128)
 ):
     if user is not None:
-        assert includeresolved == False and maxresults is None
-
         return await get_issues_internal(user_name=user)
     else:
         return await get_issues_internal(include_resolved=includeresolved, max_results=maxresults)
