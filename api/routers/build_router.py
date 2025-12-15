@@ -56,6 +56,7 @@ async def get_builds(
 @router.post("")
 async def post_build(request: BuildRequest = Body()):
     project_id = await CommonUtils.find_or_add_project(request.Project)
+    build_result = BuildResult(request.Result).name
 
     sql = """
         INSERT INTO ugs_db.Badges
@@ -67,7 +68,7 @@ async def post_build(request: BuildRequest = Body()):
     await DatabaseUtils.execute_sql(sql, (
         request.ChangeNumber,
         request.BuildType,
-        request.Result,
+        build_result,
         request.Url,
         request.ArchivePath,
         project_id

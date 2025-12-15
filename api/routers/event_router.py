@@ -50,6 +50,7 @@ async def get_user_votes(
 @router.post("")
 async def post_event(request: EventRequest = Body()):
     project_id = await CommonUtils.find_or_add_project(request.Project)
+    event_type = EventType(request.Type).name
 
     sql = """
         INSERT INTO ugs_db.UserVotes
@@ -61,7 +62,7 @@ async def post_event(request: EventRequest = Body()):
     await DatabaseUtils.execute_sql(sql, (
         request.Change,
         request.UserName,
-        request.Type,
+        event_type,
         request.Project,
         project_id
     ))

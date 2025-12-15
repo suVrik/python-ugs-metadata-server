@@ -55,6 +55,7 @@ async def post_error(
     ipaddress: str = Query(min_length=1, max_length=64)
 ):
     project_id = await CommonUtils.find_or_add_project(request.Project)
+    error_type = ErrorType(request.Type).name
 
     sql = """
         INSERT INTO ugs_db.Errors
@@ -64,7 +65,7 @@ async def post_error(
     """
 
     await DatabaseUtils.execute_sql(sql, (
-        request.Type,
+        error_type,
         request.Text,
         request.UserName,
         request.Project,
