@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
@@ -50,7 +50,7 @@ async def get_error(records: int = Query(10, gt=0)):
 
 @router.post("")
 async def post_error(
-    request: ErrorRequest,
+    request: ErrorRequest = Body(),
     version: str = Query(min_length=1, max_length=64),
     ipaddress: str = Query(min_length=1, max_length=64)
 ):

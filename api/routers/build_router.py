@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
@@ -54,7 +54,7 @@ async def get_builds(
     return results
 
 @router.post("")
-async def post_build(request: BuildRequest):
+async def post_build(request: BuildRequest = Body()):
     project_id = await CommonUtils.find_or_add_project(request.Project)
 
     sql = """

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
@@ -48,7 +48,7 @@ async def get_user_votes(
     return result
 
 @router.post("")
-async def post_event(request: EventRequest):
+async def post_event(request: EventRequest = Body()):
     project_id = await CommonUtils.find_or_add_project(request.Project)
 
     sql = """

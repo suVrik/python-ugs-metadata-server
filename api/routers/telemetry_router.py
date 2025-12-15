@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("")
 async def post_telemetry(
-    request: TelemetryRequest,
+    request: TelemetryRequest = Body(),
     version: str = Query(min_length=1, max_length=64),
     ipaddress: str = Query(min_length=1, max_length=64)
 ):
