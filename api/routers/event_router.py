@@ -19,7 +19,7 @@ async def get_user_votes(
             UserVotes.Changelist,
             UserVotes.UserName,
             UserVotes.Verdict,
-            UserVotes.Project
+            Projects.Name
         FROM ugs_db.UserVotes
         INNER JOIN ugs_db.Projects
             ON Projects.Id = UserVotes.ProjectId

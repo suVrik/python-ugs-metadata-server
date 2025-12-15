@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Query, Path
+from fastapi import APIRouter, HTTPException, Query, Path
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
@@ -82,7 +82,7 @@ async def get_issues(
     user: str | None = Query(None, min_length=1, max_length=128)
 ):
     if user is not None:
-        assert include_resolved == False and maxresults is None
+        assert includeresolved == False and maxresults is None
 
         return await get_issues_internal(user_name=user)
     else:
@@ -92,7 +92,7 @@ async def get_issues(
 async def get_issue(issue_id: int = Path(..., ge=0)):
     issues = await get_issues_internal(issue_id=issue_id, include_resolved=True)
     if len(issues) == 0:
-        return
+        raise HTTPException(status_code=404)
     return issues[0]
 
 @router.put("/{issue_id}")
@@ -299,7 +299,7 @@ async def get_issue_builds(build_id: int = Path(..., ge=0)):
     )
 
 @router_issuebuilds.put("/{build_id}")
-async def put_issue_builds(build_id: int = Path(..., ge=0)), request: IssueBuildUpdateRequest):
+async def put_issue_builds(build_id: int = Path(..., ge=0), request: IssueBuildUpdateRequest):
     sql = """
         UPDATE ugs_db.IssueBuilds
         SET Outcome = %s
