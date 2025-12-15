@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
-from models.build_model import BuildRequest, BuildResponse
+from models.build_model import BuildRequest, BuildResponse, BuildResult
 
 router = APIRouter()
 

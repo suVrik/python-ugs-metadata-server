@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
-from models.event_model import EventRequest, EventResponse
+from models.event_model import EventRequest, EventResponse, EventType
 
 router = APIRouter()
 

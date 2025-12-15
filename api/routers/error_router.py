@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Body
 
 from database_utils import DatabaseUtils
 from common_utils import CommonUtils
-from models.error_model import ErrorRequest, ErrorResponse
+from models.error_model import ErrorRequest, ErrorResponse, ErrorType
 
 router = APIRouter()
 
