@@ -6,10 +6,11 @@ class BuildBase(BaseModel):
     Result: str = Field(..., min_length=1, max_length=10)
     Url: str = Field(..., min_length=1, max_length=512)
     Project: str = Field(..., min_length=1, max_length=512)
-    ArchivePath: str = Field(..., min_length=1, max_length=512)
+    ArchivePath: str | None = Field(None, min_length=1, max_length=512)
 
 class BuildRequest(BuildBase):
     pass
 
 class BuildResponse(BuildBase):
     Id: int
+ 
